@@ -26,6 +26,71 @@ chrome.runtime.onMessage.addListener(msg => {
   }
 });
 
+/* ================= WHOIS / DOMAIN INFO ================= */
+
+async function fetchDomainInfo(domain) {
+  const domainInfoContent = document.getElementById("domain-info-content");
+  
+  try {
+    // Request domain info from background script
+    chrome.runtime.sendMessage({
+      type: "GET_DOMAIN_INFO",
+      domain: domain
+    }, (response) => {
+      if (response && response.success) {
+        displayDomainInfo(response.data);
+      } else {
+        domainInfoContent.innerHTML = '<div class="domain-error">⚠️ No WHOIS data available</div>';
+      }
+    });
+  } catch (error) {
+    console.error("Domain info fetch error:", error);
+    domainInfoContent.innerHTML = '<div class="domain-error">⚠️ Failed to fetch domain info</div>';
+  }
+}
+
+function displayDomainInfo(data) {
+  const domainInfoContent = document.getElementById("domain-info-content");
+  
+  if (!data) {
+    domainInfoContent.innerHTML = '<div class="domain-error">⚠️ No WHOIS data available</div>';
+    return;
+  }
+  
+  const domainAge = data.createdDate ? calculateDomainAge(data.createdDate) : 'Unknown';
+  const ageClass = data.domainAgeDays < 30 ? 'high' : data.domainAgeDays < 365 ? 'medium' : 'low';
+  
+  domainInfoContent.innerHTML = `
+    <ul class="domain-info-list">
+      <li class="${ageClass}">
+        📅 Created: ${data.createdDate || 'Unknown'} 
+        ${data.domainAgeDays < 30 ? '<span class="warning-badge">⚠️ NEW</span>' : ''}
+      </li>
+      <li>${data.domainAgeDays !== null ? `⏱️ Age: ${domainAge}` : '⏱️ Age: Unknown'}</li>
+      <li>🏢 Registrar: ${data.registrar || 'Unknown'}</li>
+      <li>🌍 Country: ${data.country || 'Unknown'}</li>
+      <li>⏰ Expires: ${data.expiresDate || 'Unknown'}</li>
+    </ul>
+  `;
+}
+
+function calculateDomainAge(createdDate) {
+  if (!createdDate) return 'Unknown';
+  
+  const created = new Date(createdDate);
+  const now = new Date();
+  const diffTime = Math.abs(now - created);
+  const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+  
+  if (diffDays < 30) {
+    return `${diffDays} days (VERY NEW - SUSPICIOUS!)`;
+  } else if (diffDays < 365) {
+    return `${Math.floor(diffDays / 30)} months`;
+  } else {
+    return `${Math.floor(diffDays / 365)} years`;
+  }
+}
+
 /* ================= PERMISSIONS MODEL ================= */
 
 const PERMISSIONS = {
@@ -69,7 +134,8 @@ const ADVISORIES = [
   "⚠️ Cookies enable cross-site tracking",
   "🛡️ ClickFix attacks trick users into running malicious commands",
   "🛡️ Never paste commands from untrusted websites into your terminal",
-  "🛡️ Clipboard monitoring helps detect malicious PowerShell/bash commands"
+  "🛡️ Clipboard monitoring helps detect malicious PowerShell/bash commands",
+  "🛡️ Be cautious of domains less than 30 days old - often used in phishing"
 ];
 
 /* ================= CLIPBOARD MONITOR TOGGLE ================= */
@@ -96,7 +162,7 @@ clipboardToggle.addEventListener("change", (e) => {
           chrome.tabs.sendMessage(tab.id, {
             type: "CLIPBOARD_MONITOR_TOGGLED",
             enabled: enabled
-          }).catch(() => {}); // Ignore errors for tabs that can't receive messages
+          }).catch(() => {});
         });
       });
     }
@@ -158,7 +224,6 @@ document.getElementById("block-all-btn").addEventListener("click", () => {
         }, () => {
           blockedCount++;
           if (blockedCount === Object.values(PERMISSIONS).filter(m => m.recommend === "block").length) {
-            // Reload the analysis
             location.reload();
           }
         });
@@ -175,6 +240,7 @@ chrome.tabs.query({ active: true, currentWindow: true }, ([tab]) => {
   if (!tab?.url || tab.url.startsWith("chrome://") || tab.url.startsWith("edge://")) {
     document.getElementById("site").innerText = "Unsupported page";
     document.getElementById("block-all-btn").disabled = true;
+    document.getElementById("domain-info-content").innerHTML = '<div class="domain-error">⚠️ Cannot analyze this page</div>';
     return;
   }
 
@@ -183,6 +249,9 @@ chrome.tabs.query({ active: true, currentWindow: true }, ([tab]) => {
   currentOrigin = origin;
 
   document.getElementById("site").innerText = `Site: ${url.hostname}`;
+  
+  // Fetch domain info
+  fetchDomainInfo(url.hostname);
 
   const settingsList = document.getElementById("settings");
   const adviceList = document.getElementById("advice");
@@ -216,7 +285,6 @@ chrome.tabs.query({ active: true, currentWindow: true }, ([tab]) => {
         totalRisk += setting === "allow" ? meta.risk : Math.floor(meta.risk / 2);
         suggestion = " → Recommended: BLOCK";
 
-        // Add one-click block button
         const buttonId = `block-${perm}`;
         actionButton = ` <button class="modify-btn" id="${buttonId}">🛡️ Block</button>`;
       }
@@ -227,7 +295,6 @@ chrome.tabs.query({ active: true, currentWindow: true }, ([tab]) => {
 
       settingsList.appendChild(li);
 
-      // Add click handler for block button
       if (actionButton) {
         setTimeout(() => {
           const btn = document.getElementById(`block-${perm}`);
@@ -264,21 +331,17 @@ function blockPermission(permission, label, button, listItem) {
   
   if (!api || !currentOrigin) return;
   
-  // Block the permission
   api.set({
     primaryPattern: currentOrigin + "/*",
     setting: "block"
   }, () => {
-    // Update UI
     button.textContent = "✅ Blocked";
     button.disabled = true;
     button.className = "modify-btn blocked";
     
-    // Update list item
     listItem.innerHTML = `✅ ${label}: <strong>block</strong> (site override) <button class="modify-btn blocked" disabled>✅ Blocked</button>`;
     listItem.className = "low";
     
-    // Recalculate score
     setTimeout(() => {
       location.reload();
     }, 500);
