@@ -2,13 +2,32 @@
 <html>
 <head>
   <meta charset="UTF-8">
-  <title>Permission Exposure Analyzer</title>
+  <title>AppScout - Permission Exposure Analyzer</title>
   <link rel="stylesheet" href="style.css">
 </head>
 <body>
 
-<h3>Permission Exposure Analyzer</h3>
+<h3>🛡️ AppScout Security Analyzer</h3>
 <div id="site">Loading…</div>
+
+<!-- Quick Actions Section -->
+<div id="quick-actions">
+  <h4>Quick Actions</h4>
+  <div class="action-buttons">
+    <button id="block-all-btn" class="action-btn primary">
+      🛡️ Block All Risky Permissions
+    </button>
+    <div class="toggle-container">
+      <label class="toggle-label">
+        <span>📋 Clipboard Monitor</span>
+        <input type="checkbox" id="clipboard-toggle" checked>
+        <span class="toggle-slider"></span>
+      </label>
+    </div>
+  </div>
+</div>
+
+<hr>
 
 <h4>Site Permissions</h4>
 <ul id="settings"></ul>
@@ -17,6 +36,15 @@
 
 <h4>Detected Capabilities</h4>
 <ul id="capabilities"></ul>
+
+<hr>
+
+<!-- Clipboard Threats Section -->
+<div id="clipboard-section">
+  <h4>Clipboard Threats <span id="threat-count" class="badge">0</span></h4>
+  <ul id="threat-list"></ul>
+  <button id="clear-threats-btn" class="small-btn">Clear History</button>
+</div>
 
 <hr>
 
