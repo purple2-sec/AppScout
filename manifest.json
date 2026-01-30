@@ -1,15 +1,17 @@
 {
   "manifest_version": 3,
-  "name": "AppScout - Permission Exposure Analyzer",
-  "version": "2.0.0",
-  "description": "Analyzes site permissions and protects against ClickFix attacks with clipboard monitoring",
+  "name": "AppScout - Security Analyzer",
+  "version": "2.1.0",
+  "description": "Detects and blocks ClickFix attacks, phishing, overlays, and suspicious permissions",
   "permissions": [
     "activeTab",
     "contentSettings",
     "clipboardRead",
     "clipboardWrite",
     "notifications",
-    "storage"
+    "storage",
+    "tabs",
+    "webNavigation"
   ],
   "host_permissions": [
     "<all_urls>"
@@ -21,10 +23,16 @@
     {
       "matches": ["<all_urls>"],
       "js": ["content.js"],
-      "run_at": "document_start"
+      "run_at": "document_start",
+      "all_frames": true
     }
   ],
   "action": {
     "default_popup": "popup.html"
+  },
+  "icons": {
+    "16": "icon16.png",
+    "48": "icon48.png",
+    "128": "icon128.png"
   }
 }
