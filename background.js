@@ -136,7 +136,6 @@ chrome.runtime.onMessage.addListener((msg, sender, sendResponse) => {
       // Show notification
       chrome.notifications.create({
         type: "basic",
-        iconUrl: "icon128.png",
         title: "⚠️ Malicious Command Detected!",
         message: `${threats[0].threat}\n\nDO NOT paste this into your terminal!`,
         priority: 2,
@@ -166,7 +165,6 @@ chrome.runtime.onMessage.addListener((msg, sender, sendResponse) => {
       
       chrome.notifications.create({
         type: "basic",
-        iconUrl: "icon128.png",
         title: "⚠️ Suspicious Overlay Detected!",
         message: "This page has a suspicious overlay that may be phishing. Be careful!",
         priority: 2
@@ -192,7 +190,6 @@ chrome.runtime.onMessage.addListener((msg, sender, sendResponse) => {
       
       chrome.notifications.create({
         type: "basic",
-        iconUrl: "icon128.png",
         title: "⚠️ Popup Spam Detected!",
         message: "This page is trying to open multiple popups!",
         priority: 1
@@ -205,7 +202,7 @@ chrome.runtime.onMessage.addListener((msg, sender, sendResponse) => {
   // Get tab threats
   if (msg.type === "GET_TAB_THREATS") {
     chrome.tabs.query({ active: true, currentWindow: true }, ([tab]) => {
-      const threats = tabThreats[tab.id] || [];
+      const threats = tabThreats[tab?.id] || [];
       sendResponse({ threats });
     });
     return true;
