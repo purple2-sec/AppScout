@@ -1,73 +1,40 @@
 /* ... existing styles ... */
 
-/* ================= DOMAIN INFORMATION ================= */
+/* ================= ACTIVE THREATS ================= */
 
-#domain-info-section {
-  background: linear-gradient(135deg, #1e293b 0%, #0f172a 100%);
+#active-threats-section {
+  background: linear-gradient(135deg, #7f1d1d 0%, #991b1b 100%);
   padding: 12px;
   border-radius: 10px;
   margin-bottom: 12px;
-  border: 1px solid #334155;
+  border: 2px solid #ef4444;
 }
 
-#domain-info-section h4 {
+#active-threats-section h4 {
   margin-top: 0;
   margin-bottom: 10px;
+  color: #fef2f2;
 }
 
-.domain-info-list {
+#active-threats-list {
   list-style: none;
   padding: 0;
   margin: 0;
-  max-height: none;
+  max-height: 120px;
 }
 
-.domain-info-list li {
-  padding: 6px 10px;
+#active-threats-list li {
+  padding: 8px;
   margin-bottom: 6px;
-  background: #0f172a;
+  background: rgba(254, 242, 242, 0.1);
   border-radius: 6px;
-  border-left: 3px solid #475569;
   font-size: 12px;
+  border-left: 3px solid #ef4444;
 }
 
-.domain-info-list li.high {
-  border-left-color: #ef4444;
-  background: rgba(239, 68, 68, 0.1);
-}
-
-.domain-info-list li.medium {
-  border-left-color: #facc15;
-  background: rgba(250, 204, 21, 0.1);
-}
-
-.domain-info-list li.low {
+#active-threats-list li.low {
   border-left-color: #22c55e;
-  background: rgba(34, 197, 94, 0.1);
-}
-
-.warning-badge {
-  background: #ef4444;
-  color: white;
-  padding: 2px 6px;
-  border-radius: 4px;
-  font-size: 10px;
-  font-weight: bold;
-  margin-left: 6px;
-}
-
-#domain-loading {
-  text-align: center;
-  padding: 10px;
-  color: #94a3b8;
-  font-size: 12px;
-}
-
-.domain-error {
-  text-align: center;
-  padding: 10px;
-  color: #facc15;
-  font-size: 12px;
+  color: #f0fdf4;
 }
 
 /* ... rest of existing styles ... */
